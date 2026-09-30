@@ -52,12 +52,12 @@ mavenPublishing {
         signAllPublications()
     }
 
-    coordinates(groupId = "wang.harlon", artifactId = "eventbase-kt")
+    coordinates(groupId = "wang.harlon", artifactId = "eventbase-kmp")
 
     pom {
-        name.set("eventbase-kt")
+        name.set("eventbase-kmp")
         description.set("Kotlin Multiplatform client for eventbase — typed events, offline queue, batched upload.")
-        url.set("https://github.com/HarlonWang/eventbase-kt")
+        url.set("https://github.com/HarlonWang/eventbase-kmp")
 
         licenses {
             license {
@@ -73,9 +73,9 @@ mavenPublishing {
             }
         }
         scm {
-            url.set("https://github.com/HarlonWang/eventbase-kt")
-            connection.set("scm:git:git://github.com/HarlonWang/eventbase-kt.git")
-            developerConnection.set("scm:git:ssh://git@github.com/HarlonWang/eventbase-kt.git")
+            url.set("https://github.com/HarlonWang/eventbase-kmp")
+            connection.set("scm:git:git://github.com/HarlonWang/eventbase-kmp.git")
+            developerConnection.set("scm:git:ssh://git@github.com/HarlonWang/eventbase-kmp.git")
         }
     }
 }

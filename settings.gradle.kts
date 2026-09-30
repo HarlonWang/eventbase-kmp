@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "eventbase-kt"
+rootProject.name = "eventbase-kmp"
 
 include(":library")

@@ -1,10 +1,10 @@
-# eventbase-kt
+# eventbase-kmp
 
 > [eventbase](https://github.com/HarlonWang/eventbase) 的 Kotlin Multiplatform 客户端——强类型事件、离线队列、批量上报。
 
 [English](README.md) | **简体中文**
 
-[![Maven Central](https://img.shields.io/maven-central/v/wang.harlon/eventbase-kt)](https://central.sonatype.com/artifact/wang.harlon/eventbase-kt)
+[![Maven Central](https://img.shields.io/maven-central/v/wang.harlon/eventbase-kmp)](https://central.sonatype.com/artifact/wang.harlon/eventbase-kmp)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **接入面只有四个调用**——`init`、`track`、`setUserId`、`startFlow`。队列、重试、安装标识、生命周期事件、自动属性全在库内部。服务端那一半是 [eventbase](https://github.com/HarlonWang/eventbase)，跑在你自己的 Cloudflare Worker 里。
@@ -22,7 +22,7 @@
 **1. 加依赖。** HTTP engine 由你挑。
 
 ```kotlin
-commonMain.dependencies { implementation("wang.harlon:eventbase-kt:<version>") }
+commonMain.dependencies { implementation("wang.harlon:eventbase-kmp:<version>") }
 ```
 
 **2. 启动时初始化一次。** 下面是 Android 形态；iOS 侧写法、以及那几个常量在 iOS 上从哪来，见[接入指南](docs/integration.md)。

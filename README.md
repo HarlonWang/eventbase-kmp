@@ -1,10 +1,10 @@
-# eventbase-kt
+# eventbase-kmp
 
 > Kotlin Multiplatform client for [eventbase](https://github.com/HarlonWang/eventbase) — typed events, an offline queue, and batched upload.
 
 **English** | [简体中文](README.zh-CN.md)
 
-[![Maven Central](https://img.shields.io/maven-central/v/wang.harlon/eventbase-kt)](https://central.sonatype.com/artifact/wang.harlon/eventbase-kt)
+[![Maven Central](https://img.shields.io/maven-central/v/wang.harlon/eventbase-kmp)](https://central.sonatype.com/artifact/wang.harlon/eventbase-kmp)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **The whole surface is four calls** — `init`, `track`, `setUserId`, `startFlow`. Queueing, retries, install identity, lifecycle events and automatic properties all stay inside the library. The server half is [eventbase](https://github.com/HarlonWang/eventbase), which runs in your own Cloudflare Worker.
@@ -22,7 +22,7 @@
 **1. Add the dependency.** The HTTP engine is yours to choose.
 
 ```kotlin
-commonMain.dependencies { implementation("wang.harlon:eventbase-kt:<version>") }
+commonMain.dependencies { implementation("wang.harlon:eventbase-kmp:<version>") }
 ```
 
 **2. Initialize once, at startup.** Android is shown below; the iOS form — where the constants come from instead of `BuildConfig` — is in the [integration guide](docs/integration.md).

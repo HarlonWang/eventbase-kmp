@@ -140,6 +140,6 @@ Android 侧会自动注册 `ActivityLifecycleCallbacks`、iOS 侧注册 `NSNotif
 
 Android 用的是 `ProcessLifecycleOwner` 而非自己数 Activity：自己数数不出配置变更（旋转时 started 计数归零再加一，必然切出假会话），它内置的 700ms 去抖是唯一正确的口径来源。
 
-## 与 loginbase-kt 的关系
+## 与 loginbase-kmp 的关系
 
-**不依赖**。登录相关的客户端事件由 App 在自己的 auth 回调里上报，loginbase-kt 不感知埋点；服务端那一半由 loginbase 写进同一张表，两端靠 `flow_id` 合流。
+**不依赖**。登录相关的客户端事件由 App 在自己的 auth 回调里上报，loginbase-kmp 不感知埋点；服务端那一半由 loginbase 写进同一张表，两端靠 `flow_id` 合流。

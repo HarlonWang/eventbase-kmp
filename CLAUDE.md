@@ -1,4 +1,4 @@
-# eventbase-kt
+# eventbase-kmp
 
 [eventbase](https://github.com/HarlonWang/eventbase) 的 Kotlin Multiplatform 客户端库：强类型事件、离线队列、批量上报。
 
@@ -12,7 +12,7 @@
 |---|---|
 | [eventbase](https://github.com/HarlonWang/eventbase) | **服务端仓 + 协议权威**：`docs/protocol.md` / `docs/telemetry-design.md`（事件命名规范；词汇表归各 App 私有文档） |
 | [TrendingAI](https://github.com/HarlonWang/TrendingAI) | 首个消费方，替换 Aptabase；其事件词汇表住私有父仓 |
-| [loginbase-kt](https://github.com/HarlonWang/loginbase-kt) | 邻居：同一套 CI 与发布链路；**本库不依赖它，它也不依赖本库** |
+| [loginbase-kmp](https://github.com/HarlonWang/loginbase-kmp) | 邻居：同一套 CI 与发布链路；**本库不依赖它，它也不依赖本库** |
 
 ## 铁律
 
