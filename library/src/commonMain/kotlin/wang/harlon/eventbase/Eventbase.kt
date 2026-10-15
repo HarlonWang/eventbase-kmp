@@ -17,6 +17,13 @@ object Eventbase {
     @Volatile
     private var lifecycleAttached = false
 
+    /**
+     * `init` 之前收到的全局属性，[install] 时交给新建的 client。宿主常在装配阶段就知道「本进程跑的是哪个
+     * 动态包」，而埋点初始化往往排在后面；静默丢掉这些调用会让属性整进程缺失，调用方还无从察觉。
+     * 只在 [lock] 内读写。
+     */
+    private var pendingProperties: Map<String, Any?> = emptyMap()
+
     internal fun markLifecycleAttached() {
         lock.withLock { lifecycleAttached = true }
     }
@@ -56,13 +63,22 @@ object Eventbase {
         client?.clearUserId()
     }
 
+    /**
+     * 本进程此后的每条事件都带上 [key]；[value] 为 null 即移除。**早于 `init` 调用也不丢**：先记下，
+     * `init` 时按调用顺序交给 client（键的校验、canonical 化都在那时做）。
+     */
     fun setProperty(key: String, value: Any?) {
-        client?.setProperty(key, value)
+        val installed = client ?: lock.withLock {
+            // 锁外看到的 null 可能已被并发的 init 填上：锁内再查一次，别把属性漏在待应用表里
+            client ?: run {
+                pendingProperties = if (value == null) pendingProperties - key else pendingProperties + (key to value)
+                null
+            }
+        }
+        installed?.setProperty(key, value)
     }
 
-    fun removeProperty(key: String) {
-        client?.removeProperty(key)
-    }
+    fun removeProperty(key: String) = setProperty(key, null)
 
     fun startFlow(): String? = client?.startFlow()
 
@@ -82,13 +98,14 @@ object Eventbase {
     }
 
     /**
-     * 拆掉当前实例。**面向测试与退出清理，不保证与并发 init 竞争下的正确性**——
+     * 拆掉当前实例，连同还没应用的全局属性一起清掉。**面向测试与退出清理，不保证与并发 init 竞争下的正确性**——
      * 摘除放在锁内是为了不与 init 的注册交错（平台侧注册也走同一把锁的调用方）。
      */
     fun reset() {
         val previous = lock.withLock {
             val previous = client
             client = null
+            pendingProperties = emptyMap()
             if (lifecycleAttached) {
                 lifecycleAttached = false
                 detachLifecycle()
@@ -106,6 +123,8 @@ object Eventbase {
     internal fun install(create: () -> EventbaseClient): Installed = lock.withLock {
         client?.let { return@withLock Installed(it, isNew = false) }
         val created = create()
+        pendingProperties.forEach { (key, value) -> created.setProperty(key, value) }
+        pendingProperties = emptyMap()
         client = created
         Installed(created, isNew = true)
     }
