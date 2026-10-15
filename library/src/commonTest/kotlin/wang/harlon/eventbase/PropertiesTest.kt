@@ -87,6 +87,57 @@ class PropertiesTest {
     }
 
     @Test
+    fun aPropertySetBeforeInitRidesOnEventsAfterInit() = runTest {
+        Eventbase.reset()
+        try {
+            Eventbase.setProperty("bundle_version", "v1")
+            Eventbase.setProperty("experiment", "a")
+            Eventbase.setProperty("experiment", null)
+            val sink = RecordingSink()
+            Eventbase.initForTest(sink, scope = this)
+            Eventbase.track(TestEvent("e"))
+            Eventbase.flush()
+
+            assertEquals(mapOf("bundle_version" to "v1"), sink.propsOf("e"), "set before init, removed before init")
+        } finally {
+            Eventbase.reset()
+        }
+    }
+
+    @Test
+    fun aPropertySetAfterInitGoesStraightToTheClient() = runTest {
+        Eventbase.reset()
+        try {
+            val sink = RecordingSink()
+            Eventbase.initForTest(sink, scope = this)
+            Eventbase.setProperty("bundle_version", "v2")
+            Eventbase.track(TestEvent("e"))
+            Eventbase.flush()
+
+            assertEquals(mapOf("bundle_version" to "v2"), sink.propsOf("e"))
+        } finally {
+            Eventbase.reset()
+        }
+    }
+
+    @Test
+    fun resetDropsPropertiesThatWereNeverApplied() = runTest {
+        Eventbase.reset()
+        try {
+            Eventbase.setProperty("bundle_version", "stale")
+            Eventbase.reset()
+            val sink = RecordingSink()
+            Eventbase.initForTest(sink, scope = this)
+            Eventbase.track(TestEvent("e"))
+            Eventbase.flush()
+
+            assertEquals(emptyMap(), sink.propsOf("e"))
+        } finally {
+            Eventbase.reset()
+        }
+    }
+
+    @Test
     fun propertiesDoNotOutliveTheProcess() = runTest {
         val storage = MemoryStorage()
         client(RecordingSink(), storage).setProperty("v", "1")

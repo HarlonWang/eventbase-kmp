@@ -107,6 +107,8 @@ assertEquals(mapOf("tab" to "me", "method" to "tap"), recorder.propsOf("tab_swit
 
 `setProperty(key, value)` 让本进程此后的每条事件都带上这个键，适合「整个会话都成立的上下文」——当前跑的动态包版本、实验分组之类；`value` 为 null 或 `removeProperty(key)` 即移除。
 
+早于 `init` 调用也可以：先记下，`init` 时按调用顺序应用——宿主往往在装配阶段就知道本进程跑的是哪个动态包，而埋点初始化排在后面。`reset()` 会连同未应用的属性一起清掉。
+
 - **只在本进程内有效，不落盘**：值由 App 每次启动时重新确定，落盘会让重启后、重新设置之前的事件带上旧值。在 `init` 之前调用无效
 - **入队时合并、按当时的值快照**；事件自己的同名键优先
 - **键数上限**：服务端对超过 20 个 props 的事件整条丢弃（[protocol.md](https://github.com/HarlonWang/eventbase/blob/main/docs/protocol.md) 的「限制」）。合并后会超限的那条事件**一个全局属性也不附加**、只保留自身的键，诊断日志记一行——全局属性应当少而稳定
