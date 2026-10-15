@@ -59,14 +59,14 @@ internal class EventQueue(private val storage: Storage, private val clock: Clock
 
     /**
      * 取一批待发事件，同时把过期的清掉。
-     * 一批只取 [session] 与 [user] 相同的连续前缀——两者是批级字段，混批会错误归因。
+     * 一批只取 session、user 与 version 相同的连续前缀——三者是批级字段，混批会错误归因。
      */
     fun peek(limit: Int = Limits.BATCH): List<QueuedEvent> = lock.withLock {
         purgeExpired()
         val head = items.firstOrNull() ?: return@withLock emptyList()
         items.asSequence()
             .take(limit)
-            .takeWhile { it.session == head.session && it.user == head.user }
+            .takeWhile { it.session == head.session && it.user == head.user && it.version == head.version }
             .toList()
     }
 
@@ -119,6 +119,7 @@ internal fun encode(events: Collection<QueuedEvent>): String =
                     event.flow?.let { put("flow", JsonPrimitive(it)) }
                     put("session", JsonPrimitive(event.session))
                     event.user?.let { put("user", JsonPrimitive(it)) }
+                    put("version", JsonPrimitive(event.version))
                     put("props", encodeProps(event.props))
                 }
             )
@@ -160,7 +161,8 @@ internal fun encodeProps(props: Map<String, Any?>): JsonObject =
 
 /**
  * 逐条解析：一条坏数据只丢它自己，不能带走整个队列。
- * 缺字段的记录直接丢——本库尚未发版、无存量队列；**发版后再改字段必须带迁移**。
+ * 缺字段的记录直接丢，不做旧格式迁移：改字段的那次升级会丢掉升级前落盘未发出的那几条，
+ * 代价是有界的（队列最多 [Limits.QUEUE_CAP] 条、7 天自清），换来队列格式只有一种读法。
  */
 private fun decode(raw: String): List<QueuedEvent> {
     val array = runCatching { json.parseToJsonElement(raw) as JsonArray }.getOrNull() ?: return emptyList()
@@ -176,6 +178,7 @@ private fun decodeOne(obj: JsonObject): QueuedEvent =
         props = obj["props"]?.jsonObject?.mapValues { (_, v) -> v.jsonPrimitive.scalar() } ?: emptyMap(),
         session = obj.getValue("session").jsonPrimitive.content,
         user = obj["user"]?.jsonPrimitive?.content,
+        version = obj.getValue("version").jsonPrimitive.content,
     )
 
 private fun JsonPrimitive.long(): Long = longOrNull ?: content.toLong()

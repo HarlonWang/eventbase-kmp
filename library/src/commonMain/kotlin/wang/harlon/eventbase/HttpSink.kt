@@ -39,7 +39,7 @@ internal fun body(batch: Batch): String =
         put(
             "sys",
             buildJsonObject {
-                put("version", JsonPrimitive(batch.config.appVersion))
+                put("version", JsonPrimitive(batch.version))
                 put("platform", JsonPrimitive(batch.config.platform))
                 put("channel", JsonPrimitive(batch.config.channel))
                 put("locale", JsonPrimitive(batch.config.locale))

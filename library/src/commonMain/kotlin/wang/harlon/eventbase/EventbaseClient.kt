@@ -58,7 +58,7 @@ class EventbaseClient internal constructor(
     fun track(event: Event, flow: String? = null) {
         trackedAnything = true
         val props = withProperties(event.name, canonicalProps(event.props))
-        queue.add(QueuedEvent(newId(), event.name, clock.now(), flow, props, sessionId, userId))
+        queue.add(QueuedEvent(newId(), event.name, clock.now(), flow, props, sessionId, userId, config.appVersion))
         if (config.logEvents) logLine("track ${event.name} $props")
         if (queue.size >= config.flushAt) scope.launch { flush() }
     }
@@ -107,7 +107,7 @@ class EventbaseClient internal constructor(
                     val events = queue.peek()
                     if (events.isEmpty()) return
                     val head = events.first()
-                    val batch = Batch(installId, head.session, head.user, config, events)
+                    val batch = Batch(installId, head.session, head.user, head.version, config, events)
                     val result = try {
                         sink.send(batch)
                     } catch (e: CancellationException) {

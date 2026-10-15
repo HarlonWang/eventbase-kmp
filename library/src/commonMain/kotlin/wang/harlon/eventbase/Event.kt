@@ -11,8 +11,8 @@ interface Event {
 }
 
 /**
- * [session] 与 [user] 在**入队时刻**定格，不在 flush 时取当前值——否则积压事件会被
- * 打上重启后的新 session，匿名期事件会被算到之后登录的账号头上。
+ * [session]、[user] 与 [version] 在**入队时刻**定格，不在 flush 时取当前值——否则积压事件会被
+ * 打上重启后的新 session，匿名期事件会被算到之后登录的账号头上，升级前的事件会被记成新版本的。
  */
 data class QueuedEvent(
     /** 幂等 id，入队时生成。服务端当前只存不去重，用来量化重复率——见服务端仓 docs/protocol.md */
@@ -23,4 +23,6 @@ data class QueuedEvent(
     val props: Map<String, Any?>,
     val session: String,
     val user: String?,
+    /** 入队时的 app 版本（`EventbaseConfig.appVersion`），批次的 `sys.version` 取它 */
+    val version: String,
 )

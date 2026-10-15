@@ -18,9 +18,10 @@ class BodyTest {
             install = "install-1",
             session = "session-1",
             user = "identity-1",
+            version = "1.3.0",
             config = testConfig(),
             events = listOf(
-                QueuedEvent("event-1", "app_opened", 1_700_000_000_000, "flow-1", mapOf("is_cold" to true), "session-1", "identity-1")
+                QueuedEvent("event-1", "app_opened", 1_700_000_000_000, "flow-1", mapOf("is_cold" to true), "session-1", "identity-1", "1.3.0")
             ),
         )
 
@@ -49,7 +50,7 @@ class BodyTest {
 
     @Test
     fun anonymousBatchOmitsUser() {
-        val batch = Batch("install-1", "session-1", null, testConfig(), emptyList())
+        val batch = Batch("install-1", "session-1", null, "1.3.0", testConfig(), emptyList())
         assertEquals(null, Json.parseToJsonElement(body(batch)).jsonObject["user"])
     }
 
@@ -59,9 +60,10 @@ class BodyTest {
             install = "install-1",
             session = "session-1",
             user = null,
+            version = "1.3.0",
             config = testConfig().copy(deviceId = "device-1"),
             events = listOf(
-                QueuedEvent("event-1", "app_opened", 1_700_000_000_000, null, emptyMap(), "session-1", null)
+                QueuedEvent("event-1", "app_opened", 1_700_000_000_000, null, emptyMap(), "session-1", null, "1.3.0")
             ),
         )
 

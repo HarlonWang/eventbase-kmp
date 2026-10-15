@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlinx.coroutines.test.runTest
 
-/** session 与 user 必须在入队时刻定格，见 QueuedEvent 的注释。 */
+/** session、user 与 app 版本必须在入队时刻定格，见 QueuedEvent 的注释。 */
 class AttributionTest {
 
     @Test
@@ -49,6 +49,23 @@ class AttributionTest {
         c.flush()
 
         assertEquals(listOf(listOf("from_old_session"), listOf("from_new_session")), sink.batches())
+    }
+
+    /** 升级前积压的事件不能被打上新版本号：按版本分批，各批的 sys.version 是事件入队时的版本 */
+    @Test
+    fun eventsQueuedBeforeUpgradeKeepTheOldVersion() = runTest {
+        val storage = MemoryStorage()
+        val old = client(FailingSink(), storage, config = testConfig().copy(appVersion = "1.3.0"))
+        old.track(TestEvent("before_upgrade"))
+
+        val sink = RecordingSink()
+        val upgraded = client(sink, storage, config = testConfig().copy(appVersion = "1.4.0"))
+        upgraded.track(TestEvent("after_upgrade"))
+        upgraded.flush()
+
+        assertEquals("1.3.0", sink.versionOf("before_upgrade"))
+        assertEquals("1.4.0", sink.versionOf("after_upgrade"))
+        assertEquals(listOf(listOf("before_upgrade"), listOf("after_upgrade")), sink.batches())
     }
 
     @Test

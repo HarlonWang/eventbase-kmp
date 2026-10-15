@@ -15,8 +15,8 @@ class HttpSinkTest {
         return HttpSink(HttpClient(engine) { this.expectSuccess = expectSuccess })
     }
 
-    private val batch = Batch("install-1", "session-1", null, testConfig(), listOf(
-        QueuedEvent("event-1", "app_opened", 1_700_000_000_000, null, emptyMap(), "session-1", null)
+    private val batch = Batch("install-1", "session-1", null, "1.3.0", testConfig(), listOf(
+        QueuedEvent("event-1", "app_opened", 1_700_000_000_000, null, emptyMap(), "session-1", null, "1.3.0")
     ))
 
     @Test

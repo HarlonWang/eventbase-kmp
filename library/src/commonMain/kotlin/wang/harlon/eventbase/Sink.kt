@@ -4,6 +4,8 @@ data class Batch(
     val install: String,
     val session: String,
     val user: String?,
+    /** 这一批事件入队时的 app 版本；与 [config] 的 `appVersion` 可能不同（升级前积压的事件） */
+    val version: String,
     val config: EventbaseConfig,
     val events: List<QueuedEvent>,
 )
