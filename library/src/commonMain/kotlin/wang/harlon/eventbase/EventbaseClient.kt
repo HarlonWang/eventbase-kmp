@@ -52,7 +52,7 @@ class EventbaseClient internal constructor(
         private set
 
     internal val lifecycle: LifecycleTracker by lazy {
-        LifecycleTracker(this, clock) { scope.launch { flush() } }
+        LifecycleTracker(this, clock) { launchBackgroundFlush(scope) { flush() } }
     }
 
     fun track(event: Event, flow: String? = null) {

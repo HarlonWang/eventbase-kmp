@@ -88,8 +88,9 @@ Eventbase.track(AuthFinished("sign_in", "github", outcome = "success"), Eventbas
 | | |
 |---|---|
 | Offline queue | On disk, capped at 500, oldest dropped first, events older than 7 days discarded on the way out |
-| Flush timing | On backgrounding, and whenever `flushAt` events have accumulated — **deliberately no timer**, which on mobile only buys battery drain |
+| Flush timing | On backgrounding, and whenever `flushAt` events have accumulated — **deliberately no timer**, which on mobile only buys battery drain. On iOS the backgrounding flush runs inside a `beginBackgroundTask` window, so the process is not suspended with the request in flight |
 | Retries | Exponential backoff; both 4xx and 204 dequeue, because the server has already decided |
+| Delivery | At-least-once: events are persisted before sending and dequeued only on `204`, so a process suspended or killed between the server's commit and the local dequeue resends the batch. Every event carries an id generated when it is queued; the server deduplicates on it, so storage is exactly-once |
 | Install identity | Generated on first launch, changes only on reinstall, derived from no device identifier |
 | Automatic properties | app_version, platform, channel, locale, is_debug, session — app_version, session and user are fixed when the event is queued, so events left over from before an upgrade, restart or login are never attributed to the new version, session or account |
 | Global properties | `setProperty` adds a key to every later event in the process — safe to call before `init` (applied at init), not persisted, the event's own key wins, none are attached to an event they would push past the server's 20-key limit, and keys over 40 characters are refused |

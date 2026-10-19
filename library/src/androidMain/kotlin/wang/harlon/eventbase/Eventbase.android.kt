@@ -7,6 +7,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 fun Eventbase.init(
     context: Context,
@@ -32,6 +34,10 @@ private object ForegroundObserver : DefaultLifecycleObserver {
     override fun onStart(owner: LifecycleOwner) = Eventbase.onForeground()
 
     override fun onStop(owner: LifecycleOwner) = Eventbase.onBackground()
+}
+
+internal actual fun launchBackgroundFlush(scope: CoroutineScope, flush: suspend () -> Unit) {
+    scope.launch { flush() }
 }
 
 internal actual fun detachLifecycle() {

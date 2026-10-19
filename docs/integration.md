@@ -142,6 +142,12 @@ Android 侧会自动注册 `ActivityLifecycleCallbacks`、iOS 侧注册 `NSNotif
 
 Android 用的是 `ProcessLifecycleOwner` 而非自己数 Activity：自己数数不出配置变更（旋转时 started 计数归零再加一，必然切出假会话），它内置的 700ms 去抖是唯一正确的口径来源。
 
+iOS 进后台的 flush 包在 `beginBackgroundTask` 里，向系统要约 30 秒的执行窗口。不要窗口的话进程在通知回调返回后几秒就被挂起，请求发出去了、响应回不来，这批事件要等用户下次打开 App 才重发——既晚到，又在服务端多出一份。
+
+## 交付语义
+
+**至少一次。** 事件先落盘再发送，收到 204 才出队；服务端已入库、本地尚未出队的窗口里进程被挂起或杀掉，整批会原样重发。每条事件在入队时生成 uuid 作 `id`，服务端按它去重，所以落库是恰好一次。自定义 `Sink` 若接别的后端，要自己按 `QueuedEvent.id` 做幂等，否则重复会直接进库。
+
 ## 与 loginbase-kmp 的关系
 
 **不依赖**。登录相关的客户端事件由 App 在自己的 auth 回调里上报，loginbase-kmp 不感知埋点；服务端那一半由 loginbase 写进同一张表，两端靠 `flow_id` 合流。
